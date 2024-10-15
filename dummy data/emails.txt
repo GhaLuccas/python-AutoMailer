@@ -1,0 +1,2 @@
+sat@mastershop.inf.br/ mail.mastershop.inf.br/no SSL/auth 1 / user sat / pass @33772895
+
