@@ -101,8 +101,9 @@ def criar_arquivo_erro():
     except Exception as e:
         print(f"Erro ao abrir o Notepad: {e}")
 
+
 # Função principal chamada ao clicar no botão "Enviar"
-# Função principal chamada ao clicar no botão "Enviar"
+# Now searhc in multiple files
 def processar_e_enviar(nome_empresa, escritorio_contabil):
     try:
         agora = datetime.now()
@@ -169,6 +170,8 @@ def criar_interface():
     root = tk.Tk()
     root.geometry("500x150")
     root.title("Cash - Envio de Fechamento Fiscal")
+    # Desativar redimensionamento da janela
+    root.resizable(False, False)
 
     # Ajustar colunas para centralizar os elementos
     root.grid_columnconfigure(0, weight=1)
