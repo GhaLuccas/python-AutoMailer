@@ -101,7 +101,9 @@ def criar_arquivo_erro():
     except Exception as e:
         print(f"Erro ao abrir o Notepad: {e}")
 
+
 # Função principal chamada ao clicar no botão "Enviar"
+# Now searhc in multiple files
 def processar_e_enviar(nome_empresa, escritorio_contabil):
     try:
         agora = datetime.now()
@@ -111,37 +113,65 @@ def processar_e_enviar(nome_empresa, escritorio_contabil):
         if mes_anterior == 12:
             ano_atual -= 1
 
-        caminho_pasta_nfe = fr"C:\cash\NFe\001\{ano_atual:04}\{mes_anterior:02}"
-        caminho_pasta_sat = fr"C:\cash\sat\001\{ano_atual:04}\{mes_anterior:02}"
+        # Caminhos para as pastas de NFe e SAT  C:\Autoshop\NFe\NFe\001\2024\mes  C:\Autoshop\NFe\SAT\001\2024\09
+        caminhos_nfe = [
+            fr"C:\cash\NFe\001\{ano_atual:04}\{mes_anterior:02}",
+            fr"C:\Autoshop\nfe\NFe\001\{ano_atual:04}\{mes_anterior:02}"
+        ]
+        caminhos_sat = [
+            fr"C:\cash\sat\001\{ano_atual:04}\{mes_anterior:02}",
+            fr"C:\Autoshop\nfe\SAT\001\{ano_atual:04}\{mes_anterior:02}"
+        ]
 
-        # Compactar as pastas
-        nome_zip_nfe = f"{caminho_pasta_nfe}_fechamento_NFE"
-        nome_zip_sat = f"{caminho_pasta_sat}_fechamento_SAT"
-        
-        compactar_pasta(caminho_pasta_nfe, nome_zip_nfe)
-        compactar_pasta(caminho_pasta_sat, nome_zip_sat)
-
-        # Enviar os arquivos compactados
+        # Compactar e verificar as pastas de NFe
+        arquivos_encontrados_nfe = False
+        arquivos_encontrados_sat = False
         arquivos = []
-        if os.path.exists(f"{nome_zip_nfe}.zip"):
-            arquivos.append(f"{nome_zip_nfe}.zip")
-        if os.path.exists(f"{nome_zip_sat}.zip"):
-            arquivos.append(f"{nome_zip_sat}.zip")
+        
+        for caminho_nfe in caminhos_nfe:
+            nome_zip_nfe = f"{caminho_nfe}_fechamento_NFE"
+            compactar_pasta(caminho_nfe, nome_zip_nfe)
+            if os.path.exists(f"{nome_zip_nfe}.zip"):
+                arquivos.append(f"{nome_zip_nfe}.zip")
+                arquivos_encontrados_nfe = True
 
-        if arquivos and enviar_email(nome_empresa, escritorio_contabil, arquivos):
-            messagebox.showinfo("Sucesso", "E-mail enviado com sucesso!")
+        # Compactar e verificar as pastas de SAT
+        for caminho_sat in caminhos_sat:
+            nome_zip_sat = f"{caminho_sat}_fechamento_SAT"
+            compactar_pasta(caminho_sat, nome_zip_sat)
+            if os.path.exists(f"{nome_zip_sat}.zip"):
+                arquivos.append(f"{nome_zip_sat}.zip")
+                arquivos_encontrados_sat = True
+
+        # Verificar se encontrou algum arquivo
+        if arquivos:
+            # Enviar os arquivos compactados por e-mail
+            if enviar_email(nome_empresa, escritorio_contabil, arquivos):
+                messagebox.showinfo("Sucesso", "E-mail enviado com sucesso!")
         else:
-            criar_arquivo_erro()
-            messagebox.showerror("Erro", "Nenhum arquivo para enviar ou erro no envio.")
-    except Exception:
+            # Se não encontrou nenhum arquivo, enviar e-mail com aviso
+            mensagem_falta_arquivos = "Sem arquivos este mês de: "
+            if not arquivos_encontrados_nfe and not arquivos_encontrados_sat:
+                mensagem_falta_arquivos += "NFe e SAT."
+            elif not arquivos_encontrados_nfe:
+                mensagem_falta_arquivos += "NFe."
+            elif not arquivos_encontrados_sat:
+                mensagem_falta_arquivos += "SAT."
+
+            enviar_email(nome_empresa, escritorio_contabil, [], mensagem_falta_arquivos)
+            messagebox.showinfo("Aviso", mensagem_falta_arquivos)
+    except Exception as e:
         criar_arquivo_erro()
         messagebox.showerror("Erro", "Operação fracassou")
+
 
 # Interface gráfica
 def criar_interface():
     root = tk.Tk()
     root.geometry("500x150")
     root.title("Cash - Envio de Fechamento Fiscal")
+    # Desativar redimensionamento da janela
+    root.resizable(False, False)
 
     # Ajustar colunas para centralizar os elementos
     root.grid_columnconfigure(0, weight=1)
@@ -180,3 +210,4 @@ def criar_interface():
 
 # Chamar a interface
 criar_interface()
+
