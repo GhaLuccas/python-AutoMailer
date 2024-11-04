@@ -1,4 +1,4 @@
-##Envio de Fechamento Fiscal
+Envio de Fechamento Fiscal
 Este projeto tem como objetivo automatizar o envio de arquivos fiscais por e-mail, facilitando o processo de fechamento mensal 
 para empresas e seus escritórios contábeis. A aplicação compacta os arquivos necessários e os envia para o e-mail especificado, 
 além de notificar se não houver arquivos disponíveis.
