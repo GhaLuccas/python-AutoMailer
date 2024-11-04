@@ -18,16 +18,18 @@ def carregar_config():
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'r') as f:
             linhas = f.readlines()
-            if len(linhas) == 2:
+            if len(linhas) == 4:  # Corrigido para verificar quatro linhas
                 nome_empresa = linhas[0].strip()
                 escritorio_contabil = linhas[1].strip()
-                return nome_empresa, escritorio_contabil
-    return "", ""
+                caminho_nfe = linhas[2].strip()
+                caminho_sat = linhas[3].strip()
+                return nome_empresa, escritorio_contabil, caminho_nfe, caminho_sat
+    return "", "", "", ""
 
 # Função para salvar as configurações
-def salvar_config(nome_empresa, escritorio_contabil):
+def salvar_config(nome_empresa, escritorio_contabil, caminho_nfe, caminho_sat):
     with open(CONFIG_FILE, 'w') as f:
-        f.write(f"{nome_empresa}\n{escritorio_contabil}")
+        f.write(f"{nome_empresa}\n{escritorio_contabil}\n{caminho_nfe}\n{caminho_sat}")
 
 # Função para compactar pasta
 def compactar_pasta(caminho_pasta, nome_zip):
@@ -42,7 +44,7 @@ def compactar_pasta(caminho_pasta, nome_zip):
     print(f"Pasta {caminho_pasta} compactada em {nome_zip}.zip")
 
 # Função para enviar e-mail
-def enviar_email(cliente, email_destino, arquivos):
+def enviar_email(cliente, email_destino, arquivos, mensagem_extra=""):
     # Configurações de envio de e-mail (exemplo)
     EMAIL_MASTER_SHOP = os.getenv('EMAIL_MASTER_SHOP', 'sat@mastershop.inf.br')
     SMTP_SERVER = os.getenv('SMTP_SERVER', 'mail.mastershop.inf.br')
@@ -67,7 +69,7 @@ def enviar_email(cliente, email_destino, arquivos):
     ultimo_dia = (primeiro_dia + timedelta(days=31)).replace(day=1) - timedelta(days=1)
 
     periodo = f"{primeiro_dia.strftime('%d/%m/%Y')} a {ultimo_dia.strftime('%d/%m/%Y')}"
-    mensagem = f"Arquivos fiscais de {periodo} Emitidos por {cliente}"
+    mensagem = f"Arquivos fiscais de {periodo} Emitidos por {cliente}. {mensagem_extra}"
 
     # Adicionar mensagem ao corpo do email
     msg.attach(MIMEText(mensagem, 'plain'))
@@ -151,7 +153,6 @@ def processar_e_enviar(nome_empresa, escritorio_contabil, caminho_nfe, caminho_s
         criar_arquivo_erro()
         messagebox.showerror("Erro", "Operação fracassou")
 
-
 # Interface gráfica
 def criar_interface():
     root = tk.Tk()
@@ -194,30 +195,33 @@ def criar_interface():
     sat_button = tk.Button(root, text="Selecionar SAT", command=escolher_diretorio_sat)
     sat_button.grid(row=3, column=2, padx=10, pady=10)
 
-    # Carregar configurações salvas
-    nome_empresa_salvo, escritorio_contabil_salvo = carregar_config()
-    if nome_empresa_salvo and escritorio_contabil_salvo:
-        nome_empresa_entry.insert(0, nome_empresa_salvo)
-        email_entry.insert(0, escritorio_contabil_salvo)
+    # Carregar configurações se existirem
+    nome_empresa, escritorio_contabil, caminho_nfe, caminho_sat = carregar_config()
+    nome_empresa_entry.insert(0, nome_empresa)
+    email_entry.insert(0, escritorio_contabil)
+    caminho_nfe_entry.insert(0, caminho_nfe)
+    caminho_sat_entry.insert(0, caminho_sat)
 
-    # Função chamada ao clicar em "Enviar"
-    def enviar():
-        nome_empresa = nome_empresa_entry.get()
-        escritorio_contabil = email_entry.get()
-        caminho_nfe = caminho_nfe_entry.get()
-        caminho_sat = caminho_sat_entry.get()
+    # Botão de enviar
+    enviar_button = tk.Button(root, text="Enviar", command=lambda: processar_e_enviar(
+        nome_empresa_entry.get(),
+        email_entry.get(),
+        caminho_nfe_entry.get(),
+        caminho_sat_entry.get(),
+    ))
+    enviar_button.grid(row=4, columnspan=3, padx=10, pady=10)
 
-        if not nome_empresa or not escritorio_contabil:
-            messagebox.showwarning("Atenção", "Por favor, insira o nome da empresa e o e-mail do escritório contábil.")
-            return
-
-        salvar_config(nome_empresa, escritorio_contabil)
-        processar_e_enviar(nome_empresa, escritorio_contabil, caminho_nfe, caminho_sat)
-
-    enviar_button = tk.Button(root, text="Enviar", command=enviar)
-    enviar_button.grid(row=4, column=1, padx=10, pady=20)
+    # Botão para salvar configurações
+    salvar_button = tk.Button(root, text="Salvar Configurações", command=lambda: salvar_config(
+        nome_empresa_entry.get(),
+        email_entry.get(),
+        caminho_nfe_entry.get(),
+        caminho_sat_entry.get(),
+    ))
+    salvar_button.grid(row=5, columnspan=3, padx=10, pady=10)
 
     root.mainloop()
 
+# Chama a função para criar a interface
 if __name__ == "__main__":
     criar_interface()
