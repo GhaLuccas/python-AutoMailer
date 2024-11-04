@@ -50,7 +50,7 @@ def enviar_email(cliente, email_destino, arquivos, mensagem_extra=""):
     SMTP_SERVER = os.getenv('SMTP_SERVER', 'mail.mastershop.inf.br')
     SMTP_PORT = int(os.getenv('SMTP_PORT', 587))
     SMTP_USER = os.getenv('SMTP_USER', 'sat@mastershop.inf.br')
-    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '@33772895')
+    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'xxx')
 
     msg = MIMEMultipart()
     msg['From'] = EMAIL_MASTER_SHOP
