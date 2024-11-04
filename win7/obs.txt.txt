@@ -1,0 +1,2 @@
+the python version req for win 7 is 3.8.10 you cand find it inside the python_3810 file , 
+just dowload the exe insede the user desktop

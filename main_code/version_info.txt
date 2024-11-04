@@ -1,0 +1,5 @@
+1.0 = only read the cash path
+
+2.0 = read cash and autpshop path
+
+3.0 = the user needs to put the path manualy for the system to check out the files 
